@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Faux Ami — Court Métrage Animé</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:#000;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  font-family:'Space Mono', monospace;
+  overflow:hidden;
+}
+
+/* ── PHONE FRAME ── */
+#phone {
+  width: 390px;
+  height: 844px;
+  position: relative;
+  overflow: hidden;
+  background: #000;
+  border-radius: 44px;
+  box-shadow: 0 0 0 8px #111, 0 0 0 10px #222, 0 40px 120px rgba(0,0,0,.8);
+}
+
+/* Notch */
+#phone::before {
+  content:'';
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:120px; height:30px;
+  background:#000;
+  border-radius:0 0 20px 20px;
+  z-index:9999;
+}
+
+/* ── CANVAS / SCENE CONTAINER ── */
+#film {
+  position:absolute; inset:0;
+  background:#0a0a0a;
+  overflow:hidden;
+}
+
+/* ── GRAIN OVERLAY ── */
+#film::after {
+  content:'';
+  position:absolute; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:500; opacity:.8;
+}
+
+/* ── VIGNETTE ── */
+.vignette {
+  position:absolute; inset:0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,.85) 100%);
+  z-index:10; pointer-events:none;
+}
+
+/* ══ SCENES ══════════════════════════════════ */
+.scene {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  opacity:0;
+  transition: opacity .0s;
+  z-index:1;
+}
+.scene.active { opacity:1; z-index:2; }
+
+/* ══ SCENE 1 — Calm / Serenity ══ */
+#s1 { background: linear-gradient(180deg, #0d1117 0%, #1a1f2e 50%, #0d1117 100%); }
+
+.s1-bg-stars {
+  position:absolute; inset:0; overflow:hidden;
+}
+.star {
+  position:absolute; border-radius:50%;
+  background:#fff; opacity:0;
+  animation: starTwinkle 3s ease infinite;
+}
+
+.boy-room {
+  position:absolute; bottom:0; width:100%; height:55%;
+  background: linear-gradient(0deg, #0e0e1e 0%, transparent 100%);
+}
+
+.window {
+  position:absolute; top:12%; left:50%; transform:translateX(-50%);
+  width:120px; height:90px;
+  border:3px solid #2a3550;
+  background:linear-gradient(135deg, #0a1628 0%, #1a2d5a 50%, #0a1628 100%);
+  box-shadow:0 0 30px rgba(30,80,180,.2), inset 0 0 20px rgba(30,80,180,.1);
+}
+.window::before, .window::after {
+  content:''; position:absolute; background:rgba(42,53,80,.6);
+}
+.window::before { left:50%; top:0; bottom:0; width:2px; transform:translateX(-50%); }
+.window::after { top:50%; left:0; right:0; height:2px; transform:translateY(-50%); }
+
+.moon {
+  position:absolute; top:18%; right:22%;
+  width:32px; height:32px; border-radius:50%;
+  background:linear-gradient(135deg, #f5e6c8, #d4a853);
+  box-shadow:0 0 20px rgba(212,168,83,.4);
+  animation:moonGlow 4s ease infinite alternate;
+}
+
+/* BOY SVG */
+.boy-figure {
+  position:absolute; bottom:8%;
+  width:90px; height:160px;
+  left:50%; transform:translateX(-50%);
+}
+
+/* SHADOW WHISPER */
+.shadow-entity {
+  position:absolute; bottom:8%; right:10%;
+  width:60px; height:120px;
+  opacity:0;
+  animation:shadowAppear 1s ease 2.5s forwards;
+}
+
+.whisper-bubble {
+  position:absolute; top:20%; left:50%; transform:translateX(-50%);
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(8px);
+  border-radius:20px 20px 20px 4px;
+  padding:14px 20px;
+  max-width:260px;
+  text-align:center;
+  opacity:0;
+}
+.whisper-bubble.show { animation: bubblePop .5s ease forwards; }
+.whisper-text {
+  font-family:'Cormorant Garamond'; font-style:italic;
+  font-size:1.05rem; color:rgba(255,255,255,.75);
+  line-height:1.5;
+}
+.whisper-text .speaker {
+  display:block; font-size:.6rem; letter-spacing:.2em;
+  color:rgba(255,200,100,.5); text-transform:uppercase;
+  margin-bottom:.4rem; font-style:normal;
+  font-family:'Space Mono';
+}
+
+.scene-label {
+  position:absolute; top:5%; left:5%;
+  font-size:.5rem; letter-spacing:.35em; text-transform:uppercase;
+  color:rgba(255,255,255,.2);
+}
+
+/* ══ SCENE 2 — Flash Montage ══ */
+#s2 { background:#000; }
+
+.flash-grid {
+  position:absolute; inset:0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr 1fr;
+  gap:2px;
+  opacity:0;
+  transition:opacity .3s;
+}
+.flash-grid.show { opacity:1; }
+
+.flash-cell {
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  padding:1rem;
+  position:relative; overflow:hidden;
+  opacity:0;
+}
+.flash-cell.lit {
+  animation:cellFlash .4s ease forwards;
+}
+
+.flash-icon { font-size:2.5rem; display:block; margin-bottom:.4rem; filter:grayscale(.6); }
+.flash-label { font-size:.55rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); text-align:center; line-height:1.4; }
+
+.cell-1 { background:linear-gradient(135deg,#1a1a1a,#2a1a1a); }
+.cell-2 { background:linear-gradient(135deg,#1a1a2a,#1a1a1a); }
+.cell-3 { background:linear-gradient(135deg,#2a1a1a,#1a1a1a); }
+.cell-4 { background:linear-gradient(135deg,#1a2a1a,#1a1a1a); }
+.cell-5 { background:linear-gradient(135deg,#2a2a1a,#1a1a1a); }
+.cell-6 { background:linear-gradient(135deg,#1a1a2a,#2a1a1a); }
+
+.s2-voice {
+  position:absolute; bottom:6%; left:0; right:0;
+  text-align:center; z-index:50;
+  background:linear-gradient(0deg, rgba(0,0,0,.95) 0%, transparent 100%);
+  padding:2rem 2rem 1.5rem;
+  opacity:0;
+}
+
+/* ══ SCENE 3 — Mirror / Darkness ══ */
+#s3 { background: #080810; }
+
+.mirror-frame {
+  position:absolute; top:12%; left:50%; transform:translateX(-50%);
+  width:140px; height:200px;
+  border:3px solid #2a2a3a;
+  border-radius:70px 70px 50% 50%;
+  background:linear-gradient(180deg, #101020 0%, #0a0a15 100%);
+  box-shadow:0 0 40px rgba(0,0,255,.05), inset 0 0 30px rgba(0,0,0,.5);
+  overflow:hidden;
+}
+.mirror-face {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+}
+
+.mirror-crack {
+  position:absolute; inset:0; opacity:0;
+  transition:opacity .5s;
+}
+.mirror-crack.show { opacity:1; }
+
+.dark-overlay {
+  position:absolute; inset:0;
+  background: radial-gradient(ellipse at center, rgba(20,0,40,.3) 0%, rgba(0,0,0,.7) 100%);
+  z-index:5;
+}
+
+.s3-chaos {
+  position:absolute; bottom:2%; left:5%; right:5%;
+  display:flex; gap:8px; flex-wrap:wrap;
+  opacity:0;
+}
+
+.chaos-item {
+  font-size:.55rem; letter-spacing:.12em;
+  color:rgba(255,60,60,.4); text-transform:uppercase;
+  border:1px solid rgba(255,60,60,.15);
+  padding:.25rem .6rem;
+  animation:chaosFlicker 2s ease infinite;
+}
+
+.voice-aggressive {
+  position:absolute; bottom:18%; left:0; right:0;
+  text-align:center; padding:0 2rem;
+  opacity:0;
+}
+
+/* ══ SCENE 4 — Photo / Cry ══ */
+#s4 { background: #060608; }
+
+.photo-frame {
+  position:absolute; top:15%; left:50%; transform:translateX(-50%) rotate(-3deg);
+  width:160px; height:120px;
+  background:linear-gradient(135deg,#1a1412,#2a1e16);
+  border:8px solid #1e1812;
+  box-shadow:0 8px 30px rgba(0,0,0,.6);
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  padding:8px;
+  opacity:0;
+  transition:opacity .8s, transform .8s;
+}
+.photo-frame.show { opacity:1; transform:translateX(-50%) rotate(-1deg) scale(1.05); }
+
+.photo-inner {
+  width:100%; height:100%;
+  background:linear-gradient(135deg,#2a2016,#3a2a1a);
+  border-radius:2px;
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  gap:4px;
+}
+.photo-icon { font-size:2rem; }
+.photo-caption { font-size:.5rem; letter-spacing:.15em; color:rgba(255,240,200,.3); text-transform:uppercase; }
+
+.tear-drop {
+  position:absolute;
+  width:6px; height:10px;
+  background:linear-gradient(180deg,rgba(120,160,255,.6),rgba(120,160,255,.1));
+  border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+  opacity:0;
+  animation:tearFall 2s ease infinite;
+}
+
+.drug-item {
+  position:absolute; bottom:30%;
+  left:50%; transform:translateX(-50%);
+  font-size:2rem; opacity:0;
+  transition:all .5s;
+}
+.drug-item.throw {
+  animation:throwAway .6s ease forwards;
+}
+
+/* ══ SCENE FINALE ══ */
+#sfin {
+  background:#000;
+  z-index:100;
+}
+
+.fin-bg {
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 60%, #1a0505 0%, #000 60%);
+}
+
+.fin-line1 {
+  font-family:'Cormorant Garamond'; font-style:italic;
+  font-size:1.25rem; color:rgba(255,255,255,.9);
+  text-align:center; line-height:1.6;
+  max-width:280px;
+  opacity:0;
+}
+.fin-line2 {
+  font-family:'Cormorant Garamond'; font-style:italic;
+  font-size:1.25rem; color:rgba(255,100,100,.9);
+  text-align:center; line-height:1.6;
+  max-width:280px;
+  opacity:0; margin-top:.5rem;
+}
+.fin-no {
+  font-family:'Bebas Neue';
+  font-size:3.5rem; letter-spacing:.15em;
+  color:#fff;
+  display:flex; align-items:center; gap:.5rem;
+  opacity:0; margin-top:1.5rem;
+}
+.fin-no .no-icon { font-size:2.5rem; }
+.fin-sub {
+  font-size:.6rem; letter-spacing:.3em; text-transform:uppercase;
+  color:rgba(255,255,255,.35);
+  opacity:0; margin-top:.75rem; text-align:center;
+}
+.fin-hotline {
+  font-size:.7rem; letter-spacing:.1em;
+  color:rgba(255,180,100,.6);
+  opacity:0; margin-top:2rem; text-align:center;
+  line-height:1.7;
+}
+.fin-hotline strong { color:rgba(255,200,120,.9); font-size:1rem; }
+
+.fin-divider {
+  width:40px; height:1px; background:rgba(255,255,255,.15);
+  margin:1.2rem auto; opacity:0;
+}
+
+/* ── PROGRESS BAR ── */
+#progress-bar {
+  position:absolute; bottom:0; left:0; right:0; height:3px;
+  background:rgba(255,255,255,.1); z-index:600;
+}
+#progress-fill {
+  height:100%; width:0;
+  background:linear-gradient(90deg,#c1121f,#f4a261);
+  transition:width .1s linear;
+  box-shadow:0 0 6px rgba(230,57,70,.5);
+}
+
+/* ── SCENE TIME LABELS ── */
+.time-dots {
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+  display:flex; gap:5px; z-index:600;
+}
+.tdot {
+  width:5px; height:5px; border-radius:50%;
+  background:rgba(255,255,255,.2); transition:all .3s;
+}
+.tdot.act { background:#c1121f; width:14px; border-radius:2.5px; }
+
+/* ── PLAY BUTTON ── */
+#play-btn {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  background:rgba(0,0,0,.75);
+  z-index:800; cursor:pointer;
+  transition:opacity .5s;
+}
+#play-btn.hidden { opacity:0; pointer-events:none; }
+.play-circle {
+  width:80px; height:80px; border-radius:50%;
+  background:rgba(193,18,31,.15);
+  border:2px solid rgba(193,18,31,.5);
+  display:flex; justify-content:center; align-items:center;
+  margin-bottom:1.5rem;
+  animation:playPulse 2s ease infinite;
+}
+.play-triangle {
+  width:0; height:0;
+  border-top:18px solid transparent;
+  border-bottom:18px solid transparent;
+  border-left:30px solid rgba(255,255,255,.9);
+  margin-left:6px;
+}
+.play-label {
+  font-size:.65rem; letter-spacing:.35em; text-transform:uppercase;
+  color:rgba(255,255,255,.4);
+}
+.play-title {
+  font-family:'Cormorant Garamond'; font-style:italic;
+  font-size:1.4rem; color:rgba(255,255,255,.7);
+  margin-bottom:2.5rem; text-align:center; line-height:1.5;
+}
+
+/* ── REPLAY ── */
+#replay-btn {
+  position:absolute; bottom:60px; left:50%; transform:translateX(-50%);
+  background:rgba(193,18,31,.15); border:1px solid rgba(193,18,31,.4);
+  color:rgba(255,255,255,.7); font-family:'Space Mono';
+  font-size:.55rem; letter-spacing:.25em; text-transform:uppercase;
+  padding:.7rem 2rem; cursor:pointer;
+  opacity:0; pointer-events:none; transition:opacity .5s;
+  z-index:700;
+}
+#replay-btn.show { opacity:1; pointer-events:all; }
+#replay-btn:hover { background:rgba(193,18,31,.3); color:#fff; }
+
+/* ─── ANIMATIONS ───────────────────────────── */
+@keyframes starTwinkle {
+  0%,100%{opacity:0} 50%{opacity:.8}
+}
+@keyframes moonGlow {
+  0%{box-shadow:0 0 15px rgba(212,168,83,.3)}
+  100%{box-shadow:0 0 35px rgba(212,168,83,.7)}
+}
+@keyframes shadowAppear {
+  to{opacity:.6}
+}
+@keyframes bubblePop {
+  0%{opacity:0;transform:translateX(-50%) scale(.8)}
+  100%{opacity:1;transform:translateX(-50%) scale(1)}
+}
+@keyframes cellFlash {
+  0%{opacity:0;transform:scale(.95)}
+  60%{opacity:1;transform:scale(1.02)}
+  100%{opacity:1;transform:scale(1)}
+}
+@keyframes chaosFlicker {
+  0%,100%{opacity:.4} 50%{opacity:.8}
+}
+@keyframes tearFall {
+  0%{opacity:0;transform:translateY(-5px)}
+  30%{opacity:.8}
+  100%{opacity:0;transform:translateY(40px)}
+}
+@keyframes throwAway {
+  0%{opacity:1;transform:translateX(-50%) rotate(0)}
+  30%{transform:translateX(-50%) rotate(-20deg) translateY(-20px) scale(1.2)}
+  100%{opacity:0;transform:translateX(150%) rotate(60deg) translateY(100px) scale(.5)}
+}
+@keyframes playPulse {
+  0%,100%{box-shadow:0 0 0 0 rgba(193,18,31,.4)}
+  50%{box-shadow:0 0 0 20px rgba(193,18,31,0)}
+}
+@keyframes fadeSlideUp {
+  from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)}
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+@keyframes heartbeat {
+  0%,100%{transform:scale(1)}
+  30%{transform:scale(1.08)}
+  60%{transform:scale(.98)}
+}
+@keyframes redFlash {
+  0%,100%{background:#060608}
+  50%{background:#1a0505}
+}
+
+/* Desktop scaling */
+@media(min-width:600px){
+  #phone { transform:scale(1.05); transform-origin:center; }
+}
+@media(max-width:420px){
+  #phone { width:100vw; height:100dvh; border-radius:0; }
+  body { background:#000; }
+}
+</style>
+</head>
+<body>
+
+<div id="phone">
+  <div id="film">
+    <div class="vignette"></div>
+
+    <!-- ══ PLAY SCREEN ══ -->
+    <div id="play-btn" onclick="startFilm()">
+      <p class="play-title">« Le Faux Ami »</p>
+      <div class="play-circle"><div class="play-triangle"></div></div>
+      <p class="play-label">Appuyer pour lancer · 30 sec</p>
+    </div>
+
+    <!-- ══ SCENE 1 ══ -->
+    <div class="scene" id="s1">
+      <div class="s1-bg-stars" id="stars"></div>
+      <div class="moon"></div>
+      <div class="window"></div>
+
+      <!-- Boy SVG -->
+      <div class="boy-figure">
+        <svg viewBox="0 0 90 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Head -->
+          <circle cx="45" cy="28" r="18" fill="#2a1e16" stroke="#3a2a1e" stroke-width="1.5"/>
+          <!-- Hair -->
+          <path d="M27 22 Q28 10 45 10 Q62 10 63 22 Q55 15 45 16 Q35 15 27 22Z" fill="#1a1210"/>
+          <!-- Eyes closed/sad -->
+          <path d="M37 28 Q40 26 43 28" stroke="#8a6a5a" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M47 28 Q50 26 53 28" stroke="#8a6a5a" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Body -->
+          <rect x="30" y="46" width="30" height="55" rx="8" fill="#1e2a3a" stroke="#2a3a4a" stroke-width="1"/>
+          <!-- Arms at rest -->
+          <path d="M30 52 Q15 65 18 80" stroke="#2a1e16" stroke-width="10" stroke-linecap="round"/>
+          <path d="M60 52 Q75 65 72 80" stroke="#2a1e16" stroke-width="10" stroke-linecap="round"/>
+          <!-- Legs -->
+          <rect x="32" y="100" width="12" height="55" rx="6" fill="#1a1a2a"/>
+          <rect x="46" y="100" width="12" height="55" rx="6" fill="#1a1a2a"/>
+        </svg>
+      </div>
+
+      <!-- Shadow Entity -->
+      <div class="shadow-entity" id="shadow1">
+        <svg viewBox="0 0 60 120" fill="none">
+          <ellipse cx="30" cy="10" rx="12" ry="12" fill="rgba(80,40,120,.5)"/>
+          <path d="M22 22 Q10 80 18 120" stroke="rgba(80,40,120,.3)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M38 22 Q50 80 42 120" stroke="rgba(80,40,120,.3)" stroke-width="8" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- Whisper Bubble -->
+      <div class="whisper-bubble" id="wb1">
+        <div class="whisper-text">
+          <span class="speaker">Faux Ami</span>
+          « Juste une fois…<br>pour oublier un peu. »
+        </div>
+      </div>
+
+      <div class="boy-room"></div>
+      <p class="scene-label">0:00 — Scène I</p>
+    </div>
+
+    <!-- ══ SCENE 2 ══ -->
+    <div class="scene" id="s2">
+      <div class="flash-grid" id="flashGrid">
+        <div class="flash-cell cell-1" id="fc1">
+          <span class="flash-icon">😂</span>
+          <span class="flash-label">Rire<br>artificiel</span>
+        </div>
+        <div class="flash-cell cell-2" id="fc2">
+          <span class="flash-icon">😴</span>
+          <span class="flash-label">Yeux<br>fatigués</span>
+        </div>
+        <div class="flash-cell cell-3" id="fc3">
+          <span class="flash-icon">📵</span>
+          <span class="flash-label">Maman<br>ignorée</span>
+        </div>
+        <div class="flash-cell cell-4" id="fc4">
+          <span class="flash-icon">💸</span>
+          <span class="flash-label">Argent<br>disparu</span>
+        </div>
+        <div class="flash-cell cell-5" id="fc5">
+          <span class="flash-icon">📚</span>
+          <span class="flash-label">École<br>ratée</span>
+        </div>
+        <div class="flash-cell cell-6" id="fc6">
+          <span class="flash-icon">🌑</span>
+          <span class="flash-label">Mauvaises<br>fréquentations</span>
+        </div>
+      </div>
+
+      <div class="s2-voice" id="s2voice">
+        <div class="whisper-text" style="color:rgba(255,220,120,.65);font-size:1rem;">
+          <span class="speaker" style="color:rgba(255,180,60,.4)">Faux Ami</span>
+          « T'inquiète…<br>je suis là pour toi. »
+        </div>
+      </div>
+      <p class="scene-label" style="color:rgba(255,255,255,.15)">0:05 — Scène II</p>
+    </div>
+
+    <!-- ══ SCENE 3 ══ -->
+    <div class="scene" id="s3" style="animation:redFlash 3s ease infinite;">
+      <div class="dark-overlay"></div>
+
+      <div class="mirror-frame" id="mirror">
+        <div class="mirror-face">
+          <svg viewBox="0 0 120 170" fill="none" width="110" height="165">
+            <!-- Sad face in mirror -->
+            <circle cx="60" cy="55" r="32" fill="#1a1218" stroke="#2a1a20" stroke-width="1"/>
+            <!-- Dark circles under eyes -->
+            <ellipse cx="47" cy="58" rx="8" ry="5" fill="rgba(80,20,40,.6)"/>
+            <ellipse cx="73" cy="58" rx="8" ry="5" fill="rgba(80,20,40,.6)"/>
+            <!-- Sad eyes -->
+            <circle cx="47" cy="56" r="5" fill="#2a1820"/>
+            <circle cx="73" cy="56" r="5" fill="#2a1820"/>
+            <circle cx="49" cy="54" r="2" fill="#6a4050"/>
+            <circle cx="75" cy="54" r="2" fill="#6a4050"/>
+            <!-- Frown -->
+            <path d="M47 70 Q60 64 73 70" stroke="#5a3040" stroke-width="2" stroke-linecap="round"/>
+            <!-- Tears -->
+            <path d="M48 62 Q46 70 47 78" stroke="rgba(100,140,220,.5)" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- Messy hair -->
+            <path d="M28 40 Q30 20 60 22 Q90 20 92 40 Q80 28 60 30 Q40 28 28 40Z" fill="#100e10"/>
+            <!-- Body -->
+            <rect x="30" y="87" width="60" height="75" rx="10" fill="#1a1a2a"/>
+          </svg>
+          <!-- Mirror crack SVG -->
+          <div class="mirror-crack" id="mirrorCrack">
+            <svg viewBox="0 0 140 200" width="138" height="198" style="position:absolute;inset:0;">
+              <path d="M70 10 L55 60 L80 55 L50 110 L75 100 L40 190" stroke="rgba(255,255,255,.15)" stroke-width="1.5"/>
+              <path d="M90 30 L100 70 L80 75 L110 130" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="s3-chaos" id="s3chaos">
+        <span class="chaos-item">Seul</span>
+        <span class="chaos-item">Perdu</span>
+        <span class="chaos-item">Malheureux</span>
+        <span class="chaos-item">Vide</span>
+        <span class="chaos-item">Détruit</span>
+      </div>
+
+      <div class="voice-aggressive" id="voiceAgg">
+        <div class="whisper-text" style="font-size:1.1rem;color:rgba(255,80,80,.85);">
+          <span class="speaker" style="color:rgba(255,60,60,.5);font-size:.6rem;">Faux Ami — voix agressive</span>
+          « Maintenant…<br>tu ne peux plus<br><strong style="font-size:1.3rem;color:rgba(255,80,80,1)">vivre sans moi.</strong> »
+        </div>
+      </div>
+
+      <p class="scene-label" style="color:rgba(255,255,255,.15)">0:12 — Scène III</p>
+    </div>
+
+    <!-- ══ SCENE 4 ══ -->
+    <div class="scene" id="s4">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(201,150,58,.04),transparent)"></div>
+
+      <div class="photo-frame" id="photoFrame">
+        <div class="photo-inner">
+          <span class="photo-icon">👨‍👩‍👦</span>
+          <span class="photo-caption">Ma famille</span>
+        </div>
+      </div>
+
+      <!-- Tears -->
+      <div class="tear-drop" id="t1" style="left:44%;top:42%;animation-delay:0s"></div>
+      <div class="tear-drop" id="t2" style="left:48%;top:40%;animation-delay:.6s"></div>
+      <div class="tear-drop" id="t3" style="left:52%;top:43%;animation-delay:1.2s"></div>
+
+      <!-- Drug symbol to throw -->
+      <div class="drug-item" id="drugItem">💊</div>
+
+      <div style="position:absolute;bottom:12%;left:0;right:0;text-align:center;padding:0 2rem;opacity:0;" id="s4silence">
+        <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:1rem;color:rgba(255,255,255,.45);line-height:1.7;">
+          Il voit la photo.<br>
+          <span style="color:rgba(255,200,120,.5)">Il se souvient.</span>
+        </div>
+      </div>
+
+      <p class="scene-label">0:20 — Scène IV</p>
+    </div>
+
+    <!-- ══ SCENE FINALE ══ -->
+    <div class="scene" id="sfin">
+      <div class="fin-bg"></div>
+
+      <!-- Red line accent -->
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#c1121f,transparent);opacity:.6;"></div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;padding:3rem 2.5rem;position:relative;z-index:2;">
+        <p class="fin-line1" id="fl1">
+          « La drogue ne détruit pas seulement ta vie… »
+        </p>
+        <p class="fin-line2" id="fl2">
+          Elle vole aussi ceux qui t'aiment.
+        </p>
+
+        <div class="fin-divider" id="fdiv"></div>
+
+        <div class="fin-no" id="fno">
+          <span class="no-icon">🚫</span>
+          <span>DIS NON</span>
+        </div>
+        <p class="fin-sub" id="fsub">Avant qu'il soit trop tard</p>
+
+        <div class="fin-divider" id="fdiv2" style="margin-top:1.5rem;"></div>
+
+        <div class="fin-hotline" id="fhotline">
+          🇹🇳 Aide gratuite en Tunisie<br>
+          <strong>+216 71 764 300</strong><br>
+          <span style="font-size:.55rem;color:rgba(255,180,100,.4);">DHMK · Disponible 24h/7j · Confidentiel</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROGRESS ── -->
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+    <div class="time-dots" id="dots">
+      <div class="tdot act" data-s="0"></div>
+      <div class="tdot" data-s="1"></div>
+      <div class="tdot" data-s="2"></div>
+      <div class="tdot" data-s="3"></div>
+      <div class="tdot" data-s="4"></div>
+    </div>
+
+    <button id="replay-btn" onclick="replayFilm()">↺ Rejouer</button>
+  </div>
+</div>
+
+<script>
+// ── SETUP STARS ──
+const starsEl = document.getElementById('stars');
+for(let i = 0; i < 60; i++){
+  const s = document.createElement('div');
+  s.className = 'star';
+  const sz = Math.random() * 2 + 1;
+  s.style.cssText = `
+    width:${sz}px; height:${sz}px;
+    left:${Math.random()*100}%;
+    top:${Math.random()*50}%;
+    animation-delay:${Math.random()*3}s;
+    animation-duration:${2+Math.random()*3}s;
+  `;
+  starsEl.appendChild(s);
+}
+
+// ── FILM ENGINE ──
+let filmTimer = null;
+let progTimer = null;
+let progStart = 0;
+const DURATION = 30000;
+
+const scenes = ['s1','s2','s3','s4','sfin'];
+
+function showScene(idx) {
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  document.getElementById(scenes[idx]).classList.add('active');
+  document.querySelectorAll('.tdot').forEach((d,i) => d.classList.toggle('act', i===idx));
+}
+
+function animate(el, style) {
+  if(el) Object.assign(el.style, style);
+}
+
+function startFilm() {
+  document.getElementById('play-btn').classList.add('hidden');
+  progStart = Date.now();
+  runProgress();
+  playScene1();
+}
+
+function runProgress() {
+  progTimer = setInterval(() => {
+    const pct = Math.min((Date.now()-progStart)/DURATION*100, 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    if(pct >= 100) clearInterval(progTimer);
+  }, 80);
+}
+
+// ════ SCENE 1 — 0-5s ════
+function playScene1() {
+  showScene(0);
+  // Show whisper at 2.5s
+  setTimeout(() => {
+    const wb = document.getElementById('wb1');
+    wb.classList.add('show');
+    animate(wb, {opacity:'1'});
+  }, 2500);
+  // Transition at 5s
+  setTimeout(playScene2, 5000);
+}
+
+// ════ SCENE 2 — 5-12s ════
+function playScene2() {
+  showScene(1);
+  const grid = document.getElementById('flashGrid');
+  grid.classList.add('show');
+  // Flash each cell in sequence
+  const cells = ['fc1','fc2','fc3','fc4','fc5','fc6'];
+  cells.forEach((id, i) => {
+    setTimeout(() => {
+      document.getElementById(id).classList.add('lit');
+    }, i * 600);
+  });
+  // Show voice at 4s into scene
+  setTimeout(() => {
+    animate(document.getElementById('s2voice'), {opacity:'1', transition:'opacity .8s'});
+  }, 4000);
+  setTimeout(playScene3, 7000);
+}
+
+// ════ SCENE 3 — 12-20s ════
+function playScene3() {
+  showScene(2);
+  // Show mirror crack at 2s
+  setTimeout(() => {
+    document.getElementById('mirrorCrack').classList.add('show');
+    document.getElementById('mirror').style.animation = 'shake .5s ease';
+  }, 2000);
+  // Show chaos tags at 3s
+  setTimeout(() => {
+    animate(document.getElementById('s3chaos'), {opacity:'1', transition:'opacity .6s'});
+  }, 3000);
+  // Aggressive voice at 4.5s
+  setTimeout(() => {
+    animate(document.getElementById('voiceAgg'), {opacity:'1', transition:'opacity .8s'});
+  }, 4500);
+  setTimeout(playScene4, 8000);
+}
+
+// ════ SCENE 4 — 20-27s ════
+function playScene4() {
+  showScene(3);
+  // Show photo frame
+  setTimeout(() => {
+    document.getElementById('photoFrame').classList.add('show');
+    animate(document.getElementById('photoFrame'), {});
+  }, 500);
+  // Show silence text
+  setTimeout(() => {
+    animate(document.getElementById('s4silence'), {opacity:'1', transition:'opacity 1s'});
+  }, 1500);
+  // Show drug item
+  setTimeout(() => {
+    animate(document.getElementById('drugItem'), {opacity:'1', transition:'opacity .5s'});
+  }, 2500);
+  // Tears start appearing via CSS
+  const tears = ['t1','t2','t3'];
+  tears.forEach(t => {
+    document.getElementById(t).style.animation = 'tearFall 1.8s ease infinite';
+    document.getElementById(t).style.animationDelay = Math.random()*1 + 's';
+  });
+  // Throw drug at 4.5s
+  setTimeout(() => {
+    document.getElementById('drugItem').classList.add('throw');
+  }, 4500);
+  setTimeout(playSceneFin, 7000);
+}
+
+// ════ SCENE FIN — 27-30s ════
+function playSceneFin() {
+  showScene(4);
+
+  // Staggered reveal of finale elements
+  const reveals = [
+    {id:'fl1', delay:400, style:{opacity:'1', animation:'fadeSlideUp .8s ease forwards'}},
+    {id:'fl2', delay:1500, style:{opacity:'1', animation:'fadeSlideUp .8s ease forwards'}},
+    {id:'fdiv', delay:2600, style:{opacity:'1', transition:'opacity .5s'}},
+    {id:'fno', delay:3000, style:{opacity:'1', animation:'fadeSlideUp .6s ease forwards, heartbeat 1.5s ease infinite 1s'}},
+    {id:'fsub', delay:3800, style:{opacity:'1', animation:'fadeSlideUp .6s ease forwards'}},
+    {id:'fdiv2', delay:4400, style:{opacity:'1', transition:'opacity .5s'}},
+    {id:'fhotline', delay:4800, style:{opacity:'1', animation:'fadeSlideUp .8s ease forwards'}},
+  ];
+
+  reveals.forEach(r => {
+    setTimeout(() => {
+      const el = document.getElementById(r.id);
+      if(el) Object.assign(el.style, r.style);
+    }, r.delay);
+  });
+
+  // Show replay btn
+  setTimeout(() => {
+    document.getElementById('replay-btn').classList.add('show');
+  }, 5500);
+}
+
+function replayFilm() {
+  // Reset all
+  clearInterval(progTimer);
+  clearInterval(filmTimer);
+  document.getElementById('progress-fill').style.width = '0';
+  document.getElementById('replay-btn').classList.remove('show');
+
+  // Reset scene 1
+  const wb = document.getElementById('wb1');
+  wb.style.opacity = '0'; wb.classList.remove('show');
+  document.getElementById('shadow1').style.animation = 'none';
+  document.getElementById('shadow1').style.opacity = '0';
+  void document.getElementById('shadow1').offsetWidth;
+  document.getElementById('shadow1').style.animation = 'shadowAppear 1s ease 2.5s forwards';
+
+  // Reset scene 2
+  document.getElementById('flashGrid').classList.remove('show');
+  document.querySelectorAll('.flash-cell').forEach(c => c.classList.remove('lit'));
+  animate(document.getElementById('s2voice'), {opacity:'0', transition:'none'});
+
+  // Reset scene 3
+  document.getElementById('mirrorCrack').classList.remove('show');
+  document.getElementById('mirror').style.animation = '';
+  animate(document.getElementById('s3chaos'), {opacity:'0', transition:'none'});
+  animate(document.getElementById('voiceAgg'), {opacity:'0', transition:'none'});
+
+  // Reset scene 4
+  document.getElementById('photoFrame').classList.remove('show');
+  animate(document.getElementById('photoFrame'), {opacity:'0'});
+  animate(document.getElementById('s4silence'), {opacity:'0'});
+  animate(document.getElementById('drugItem'), {opacity:'0', transition:'none'});
+  document.getElementById('drugItem').classList.remove('throw');
+  document.getElementById('drugItem').style.animation = '';
+
+  // Reset finale
+  ['fl1','fl2','fdiv','fno','fsub','fdiv2','fhotline'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.opacity = '0';
+  });
+
+  // Small pause then restart
+  setTimeout(() => {
+    progStart = Date.now();
+    runProgress();
+    playScene1();
+  }, 200);
+}
+</script>
+</body>
+</html>
